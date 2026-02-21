@@ -3,20 +3,20 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:            #060c10;
+  --bg:            #d2d6d8;
   --surface:       rgba(8, 18, 26, 0.85);
   --border:        rgba(87, 99, 105, 0.22);
   --border-hover:  rgba(164, 176, 182, 0.50);
 
   /* Derived from the BJJ image palette:
      gi blue-greys → cyan/purple; skin tones → pink/amber */
-  --cyan:   #6ab4c8;   /* teal-blue, gi highlight */
-  --purple: #4a6b7a;   /* deep teal-slate, gi shadow */
-  --pink:   #c47d65;   /* warm skin-tone accent */
-  --amber:  #a96e50;   /* dark warm brown */
+  --cyan:   #1e7a98;   /* teal-blue, gi highlight */
+  --purple: #1a3d52;   /* deep teal-slate, gi shadow */
+  --pink:   #8a4535;   /* warm skin-tone accent */
+  --amber:  #7a4528;   /* dark warm brown */
 
-  --text:       #dce8ec;
-  --text-muted: #627880;
+  --text:       #0a1820;
+  --text-muted: #1e3a50;
 
   /* Sizing helpers shared between the silhouette and sidebar */
   --bjj-h: 72vh;
@@ -65,7 +65,7 @@ a   { color: inherit; text-decoration: none; }
   height: var(--bjj-h);
   width: auto;
   transform: none;
-  opacity: 0.75;
+  opacity: 0.95;
   z-index: 0;
   pointer-events: none;
 }
@@ -89,7 +89,7 @@ a   { color: inherit; text-decoration: none; }
   width: var(--bjj-w);
   display: flex;
   align-items: flex-start;
-  padding-top: 100px;
+  padding-top: 40px;
   /* Heavy comic-style right-edge divider */
   padding-right: var(--gap);
   border-right: 3px solid rgba(87, 99, 105, 0.4);
@@ -100,25 +100,21 @@ a   { color: inherit; text-decoration: none; }
 }
 
 .name {
-  font-size: clamp(2rem, 3vw, 3rem);
+  font-size: clamp(2.5rem, 4vw, 4.5rem);
   font-weight: 800;
   letter-spacing: -0.04em;
   line-height: 1.05;
   margin-bottom: 1.1rem;
 
-  background: linear-gradient(135deg,
-    var(--cyan)   0%,
-    var(--purple) 50%,
-    var(--pink)   100%);
-  background-size: 200% 200%;
-  animation: gradientShift 8s ease-in-out infinite alternate;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  /* Match the card box colour */
+  color: #e1ecf0;
 
-  /* Comic-style ink outline — stroke paints first, gradient fill on top */
-  -webkit-text-stroke: 2px rgba(6, 12, 16, 0.85);
+  /* Comic-style ink outline — thicker stroke, stroke paints first */
+  -webkit-text-stroke: 7px rgba(55, 65, 70, 0.88);
   paint-order: stroke fill;
+
+  /* Same hard offset shadow as the cards */
+  text-shadow: 6px 6px 5px rgba(0, 0, 0, 0.55);
 }
 
 @keyframes gradientShift {
@@ -135,13 +131,18 @@ a   { color: inherit; text-decoration: none; }
 
 .tagline li {
   font-family: var(--font-mono);
-  font-size: 0.92rem;
+  font-size: 1.05rem;
+  font-weight: 700;
   letter-spacing: 0.13em;
   text-transform: uppercase;
   color: var(--text-muted);
-  padding-left: 0.7rem;
-  border-left: 3px solid rgba(106, 180, 200, 0.45);
+  padding: 0.15rem 0.5rem 0.15rem 0.7rem;
+  border-left: 3px solid rgba(30, 122, 152, 0.6);
   line-height: 1.5;
+
+  /* Slightly darker semi-transparent background — stays readable over the SVG */
+  background: rgba(160, 172, 178, 0.55);
+  border-radius: 3px;
 }
 
 /* ─── Cards area ──────────────────────────────────────────────────────────── */
@@ -183,7 +184,7 @@ a   { color: inherit; text-decoration: none; }
   border-radius: var(--radius-card);
 
   /* Comic-book hard offset shadow */
-  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.65);
+  box-shadow: 6px 6px 5px rgba(0, 0, 0, 0.55);
 
   /* Sketchy hand-drawn border effect */
   filter: url(#sketchy);
@@ -206,7 +207,7 @@ a   { color: inherit; text-decoration: none; }
 .profile-card:hover {
   border-color: rgba(47, 62, 70, 0.75);
   transform: translate(-2px, -3px);
-  box-shadow: 7px 8px 0 rgba(0, 0, 0, 0.7);
+  box-shadow: 8px 9px 6px rgba(0, 0, 0, 0.6);
 }
 
 /* Paper grain texture — SVG fractalNoise tiled over the card surface */

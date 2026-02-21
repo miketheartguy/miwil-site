@@ -14,7 +14,7 @@ const DRIFT_RADIUS    = 80;   // max drift from origin
 const MOUSE_RADIUS    = 300;  // influence radius
 const MOUSE_ATTRACT   = 0.004;
 const MOUSE_REPEL_R   = 90;   // inside this radius, repel instead
-const EDGE_LINE_WIDTH = 0.6;
+const EDGE_LINE_WIDTH = 1.5;
 
 export class DelaunayBg {
   private canvas: HTMLCanvasElement;
@@ -135,39 +135,29 @@ export class DelaunayBg {
     const W = window.innerWidth;
     const H = window.innerHeight;
 
-    // Mouse distance factor [0 = far, 1 = at cursor]
     const dx = cx - this.mx;
     const dy = cy - this.my;
     const dist = Math.sqrt(dx * dx + dy * dy);
     const mouseFactor = Math.max(0, 1 - dist / MOUSE_RADIUS);
-    const hotspot     = Math.max(0, 1 - dist / 120);  // sharp core
+    const hotspot     = Math.max(0, 1 - dist / 120);
 
-    // Mouse speed contributes extra brightness
     const speed = Math.min(Math.sqrt(this.mvx ** 2 + this.mvy ** 2) / 30, 1);
 
-    // Slow hue drift — base range matches the BJJ gi (teal-blue)
     const timeCycle = (this.t * 8) % 360;
     const posHue    = (cx / W) * 20 + (cy / H) * 20;
+    const baseHue   = (185 + posHue + timeCycle) % 360;
+    const hue       = (baseHue - mouseFactor * 160 * (1 + speed * 0.4) + 360) % 360;
 
-    // Base hue: teal/steel-blue (185–225); near mouse shifts back to warm amber (~25°)
-    const baseHue = (185 + posHue + timeCycle) % 360;
-    const hue     = (baseHue - mouseFactor * 160 * (1 + speed * 0.4) + 360) % 360;
+    // Far from cursor: no saturation, fully transparent fill — background shows through
+    // Near cursor: saturated colour blooms in
+    const sat       = mouseFactor * 70 + hotspot * 15 + speed * 10;
+    const lightness = 88 - mouseFactor * 38 - hotspot * 20;
+    const alpha     = mouseFactor * 0.72 + hotspot * 0.22;
 
-    // Saturation: slightly muted to echo the desaturated gi palette, ramps near mouse
-    const sat = 40 + mouseFactor * 38;
-
-    // Lightness: dark by default, brilliant near mouse
-    const lBase     = 6 + Math.sin(this.t * 2 + cx * 0.007) * 3;
-    const lightness = lBase + mouseFactor * 38 + hotspot * 28 + speed * 15;
-
-    // Alpha: semi-transparent so layers shimmer
-    const alpha      = 0.18 + mouseFactor * 0.45 + hotspot * 0.25;
-    const edgeAlpha  = 0.25 + mouseFactor * 0.55 + hotspot * 0.3;
-    const edgeL      = lightness + 15;
-
+    // Stroke: heavy black lines everywhere, constant
     return {
-      fill:   `hsla(${hue},${sat}%,${lightness}%,${alpha})`,
-      stroke: `hsla(${(hue + 15) % 360},${sat + 12}%,${edgeL}%,${edgeAlpha})`,
+      fill:   `hsla(${hue}, ${sat}%, ${lightness}%, ${alpha})`,
+      stroke: `rgba(10, 10, 10, 0.55)`,
     };
   }
 
@@ -176,8 +166,8 @@ export class DelaunayBg {
     const W = window.innerWidth;
     const H = window.innerHeight;
 
-    // Deep space background — very dark blue-grey matching the BJJ palette
-    ctx.fillStyle = '#060c10';
+    // Light gray background
+    ctx.fillStyle = '#d2d6d8';
     ctx.fillRect(0, 0, W, H);
 
     const delaunay  = Delaunay.from(this.pts, p => p.x, p => p.y);
@@ -205,15 +195,6 @@ export class DelaunayBg {
       ctx.strokeStyle = stroke;
       ctx.lineWidth = EDGE_LINE_WIDTH;
       ctx.stroke();
-    }
-
-    // Soft radial glow at cursor — warm amber core, teal fade (matches BJJ skin/gi tones)
-    if (this.mx > 0) {
-      const grad = ctx.createRadialGradient(this.mx, this.my, 0, this.mx, this.my, MOUSE_RADIUS * 0.7);
-      grad.addColorStop(0, 'hsla(20, 55%, 55%, 0.08)');
-      grad.addColorStop(1, 'hsla(195, 50%, 35%, 0)');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, W, H);
     }
   }
 
