@@ -9,12 +9,25 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
     rel="stylesheet"
   />
   <link rel="stylesheet" href="/src/style.css" />
 </head>
 <body>
+  <!-- SVG filter definitions — used for the hand-drawn / sketchy border effect -->
+  <svg id="svg-filters" width="0" height="0" aria-hidden="true" focusable="false"
+       style="position:absolute;overflow:hidden;pointer-events:none">
+    <defs>
+      <filter id="sketchy" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.04"
+                      numOctaves="3" seed="2" result="noise"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise"
+                           scale="3" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+    </defs>
+  </svg>
+
   <canvas id="bg"></canvas>
   <img id="bjj-silhouette" src="/bjj.svg" alt="" aria-hidden="true" />
 

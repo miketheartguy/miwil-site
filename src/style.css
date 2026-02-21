@@ -22,8 +22,9 @@
   --bjj-h: 72vh;
   --bjj-w: calc(var(--bjj-h) * 534 / 755 * 0.7);
 
-  --font-sans: 'Space Grotesk', system-ui, sans-serif;
-  --font-mono: 'Space Mono', 'Courier New', monospace;
+  --font-sans:   'Space Grotesk', system-ui, sans-serif;
+  --font-mono:   'Space Mono', 'Courier New', monospace;
+  --font-sketch: 'Architects Daughter', cursive;
 
   --radius-card: 18px;
   --blur-card:   22px;
@@ -89,9 +90,9 @@ a   { color: inherit; text-decoration: none; }
   display: flex;
   align-items: flex-start;
   padding-top: 100px;
-  /* Subtle right-edge divider */
+  /* Heavy comic-style right-edge divider */
   padding-right: var(--gap);
-  border-right: 1px solid rgba(87, 99, 105, 0.2);
+  border-right: 3px solid rgba(87, 99, 105, 0.4);
 }
 
 .sidebar-inner {
@@ -99,11 +100,11 @@ a   { color: inherit; text-decoration: none; }
 }
 
 .name {
-  font-size: clamp(1.35rem, 2vw, 1.85rem);
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  line-height: 1.08;
-  margin-bottom: 1rem;
+  font-size: clamp(2rem, 3vw, 3rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  margin-bottom: 1.1rem;
 
   background: linear-gradient(135deg,
     var(--cyan)   0%,
@@ -114,6 +115,10 @@ a   { color: inherit; text-decoration: none; }
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+
+  /* Comic-style ink outline — stroke paints first, gradient fill on top */
+  -webkit-text-stroke: 2px rgba(6, 12, 16, 0.85);
+  paint-order: stroke fill;
 }
 
 @keyframes gradientShift {
@@ -130,12 +135,12 @@ a   { color: inherit; text-decoration: none; }
 
 .tagline li {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.92rem;
   letter-spacing: 0.13em;
   text-transform: uppercase;
   color: var(--text-muted);
-  padding-left: 0.6rem;
-  border-left: 2px solid rgba(106, 180, 200, 0.28);
+  padding-left: 0.7rem;
+  border-left: 3px solid rgba(106, 180, 200, 0.45);
   line-height: 1.5;
 }
 
@@ -154,24 +159,38 @@ a   { color: inherit; text-decoration: none; }
 /* ─── Profile cards ───────────────────────────────────────────────────────── */
 
 .profile-card {
+  position: relative;
   min-height: 0;             /* let grid squish it */
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   padding: 1.1rem;
 
-  background: var(--surface);
-  backdrop-filter: blur(var(--blur-card)) saturate(160%);
-  -webkit-backdrop-filter: blur(var(--blur-card)) saturate(160%);
-  border: 1px solid var(--border);
+  /* Sketch font for all card text */
+  font-family: var(--font-sketch);
+
+  /* Light frosted-glass panel — translucent so the canvas shows through */
+  --text:       #0d1e28;
+  --text-muted: #3a5262;
+  --cyan:       #1a5a72;
+  --purple:     #2a4060;
+  --pink:       #7a3e30;
+
+  background: rgba(225, 236, 240, 0.78);
+  backdrop-filter: blur(var(--blur-card)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--blur-card)) saturate(140%);
+  border: 3px solid rgba(47, 62, 70, 0.45);
   border-radius: var(--radius-card);
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,0.04) inset,
-    0 16px 48px rgba(0,0,0,0.45);
+
+  /* Comic-book hard offset shadow */
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.65);
+
+  /* Sketchy hand-drawn border effect */
+  filter: url(#sketchy);
 
   opacity: 0;
   animation: cardIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s, filter 0.25s;
 }
 
 @keyframes cardIn {
@@ -185,13 +204,42 @@ a   { color: inherit; text-decoration: none; }
 #social-card   { animation-delay: 0.35s; }
 
 .profile-card:hover {
-  border-color: var(--border-hover);
-  transform: translateY(-2px);
-  box-shadow:
-    0 0 0 1px rgba(106, 180, 200, 0.10) inset,
-    0 24px 64px rgba(0,0,0,0.5),
-    0 0 32px rgba(106, 180, 200, 0.07);
+  border-color: rgba(47, 62, 70, 0.75);
+  transform: translate(-2px, -3px);
+  box-shadow: 7px 8px 0 rgba(0, 0, 0, 0.7);
 }
+
+/* Paper grain texture — SVG fractalNoise tiled over the card surface */
+.profile-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: url('/paper-texture.svg');
+  mix-blend-mode: multiply;
+  opacity: 0.32;
+  pointer-events: none;
+}
+
+/* Light-panel child overrides — fix elements with hardcoded dark-theme colours */
+.profile-card .photo-skeleton {
+  background: linear-gradient(
+    110deg,
+    rgba(0, 0, 0, 0.06) 0%,
+    rgba(0, 0, 0, 0.13) 40%,
+    rgba(0, 0, 0, 0.06) 60%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.9s infinite linear;
+}
+.profile-card .photo-item           { background: rgba(0, 0, 0, 0.08); }
+.profile-card .no-data              { border-color: rgba(0, 0, 0, 0.13); }
+.profile-card .card-cta             { border-bottom-color: rgba(26, 90, 114, 0.3); }
+.profile-card .card-cta:hover       { border-bottom-color: var(--cyan); }
+.profile-card .social-link:hover    { background: rgba(0, 0, 0, 0.07); }
+.profile-card .avatar-initials      { color: #1a5a72; }
+.profile-card .linkedin-cta         { color: #1a5a72; border-bottom-color: rgba(26, 90, 114, 0.3); }
+.profile-card .linkedin-cta:hover   { border-bottom-color: #1a5a72; }
 
 /* ─── Card header ─────────────────────────────────────────────────────────── */
 
@@ -216,9 +264,9 @@ a   { color: inherit; text-decoration: none; }
 }
 
 .linkedin-badge {
-  background: linear-gradient(135deg, rgba(0,119,181,0.35), rgba(0,212,255,0.1));
-  border-color: rgba(0,119,181,0.38);
-  color: #60c0ff;
+  background: linear-gradient(135deg, rgba(74,107,122,0.35), rgba(106,180,200,0.12));
+  border-color: rgba(74,107,122,0.38);
+  color: var(--cyan);
 }
 
 .insta-icon, .linkedin-icon { width: 20px; height: 20px; }
@@ -226,7 +274,7 @@ a   { color: inherit; text-decoration: none; }
 .card-info { flex: 1; min-width: 0; }
 
 .handle {
-  font-size: 0.92rem;
+  font-size: 1.35rem;
   font-weight: 600;
   letter-spacing: -0.01em;
   white-space: nowrap;
@@ -244,7 +292,7 @@ a   { color: inherit; text-decoration: none; }
 .handle a:hover { filter: brightness(1.25); }
 
 .card-bio {
-  font-size: 0.73rem;
+  font-size: 1.1rem;
   color: var(--text-muted);
   margin-top: 0.2rem;
   line-height: 1.4;
@@ -355,7 +403,7 @@ a   { color: inherit; text-decoration: none; }
   gap: 0.35rem;
   align-self: flex-start;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -402,8 +450,8 @@ a   { color: inherit; text-decoration: none; }
 }
 
 .social-icon {
-  width: 20px;
-  height: 20px;
+  width: 26px;
+  height: 26px;
   flex-shrink: 0;
   color: var(--cyan);
   transition: color 0.2s;
@@ -418,7 +466,7 @@ a   { color: inherit; text-decoration: none; }
 }
 
 .social-name {
-  font-size: 0.8rem;
+  font-size: 1.3rem;
   font-weight: 600;
   color: var(--text);
   line-height: 1.2;
@@ -426,7 +474,7 @@ a   { color: inherit; text-decoration: none; }
 
 .social-handle {
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 1rem;
   color: var(--text-muted);
   letter-spacing: 0.03em;
 }
@@ -487,7 +535,7 @@ a   { color: inherit; text-decoration: none; }
 }
 
 .linkedin-company {
-  font-size: 0.78rem;
+  font-size: 1rem;
   color: var(--text-muted);
   text-align: center;
 }
@@ -504,7 +552,7 @@ a   { color: inherit; text-decoration: none; }
 @media (prefers-reduced-motion: reduce) {
   .name           { animation: none; }
   .photo-skeleton { animation: none; }
-  .profile-card   { animation: none; opacity: 1; transition: none; }
+  .profile-card   { animation: none; opacity: 1; transition: none; filter: none; }
   .photo-item img { transition: none; }
 }
 
@@ -549,8 +597,8 @@ a   { color: inherit; text-decoration: none; }
   .tagline li {
     border-left: none;
     padding-left: 0;
-    border-bottom: 1px solid rgba(106,180,200,0.22);
-    padding-bottom: 1px;
+    border-bottom: 3px solid rgba(106,180,200,0.45);
+    padding-bottom: 2px;
   }
 
   .cards-area {
