@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Background -->
+  <rect width="32" height="32" rx="6" fill="#152535"/>
+  <!-- Subtle inner border -->
+  <rect x="1" y="1" width="30" height="30" rx="5.5" fill="none"
+        stroke="rgba(225,236,240,0.2)" stroke-width="1"/>
+  <!-- M — teal -->
+  <polyline points="2,24 2,8 7.5,19 13,8 13,24"
+            fill="none" stroke="#6ab4c8" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- W — warm -->
+  <polyline points="17,8 19.5,24 23,13 26.5,24 30,8"
+            fill="none" stroke="#c47d65" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
