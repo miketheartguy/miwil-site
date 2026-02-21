@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+
+# Build output (regenerated on every deploy — never commit)
+dist/
+
+# Local secrets — NEVER commit these
+.env
+.dev.vars
+
+# Wrangler cache
+.wrangler/
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Python virtualenv (not part of this project)
+venv/
+
+# Claude Code local settings
+.claude/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.log
+*.local

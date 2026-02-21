@@ -1,0 +1,8 @@
+name = "miwil"
+pages_build_output_dir = "dist"
+compatibility_date = "2024-09-23"
+
+[[kv_namespaces]]
+binding = "LINKEDIN_KV"
+id = ""          # fill in after: wrangler kv namespace create LINKEDIN_KV
+preview_id = ""  # fill in after: wrangler kv namespace create LINKEDIN_KV --preview

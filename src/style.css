@@ -1,0 +1,606 @@
+/* ─── Reset & tokens ──────────────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:            #060c10;
+  --surface:       rgba(8, 18, 26, 0.85);
+  --border:        rgba(87, 99, 105, 0.22);
+  --border-hover:  rgba(164, 176, 182, 0.50);
+
+  /* Derived from the BJJ image palette:
+     gi blue-greys → cyan/purple; skin tones → pink/amber */
+  --cyan:   #6ab4c8;   /* teal-blue, gi highlight */
+  --purple: #4a6b7a;   /* deep teal-slate, gi shadow */
+  --pink:   #c47d65;   /* warm skin-tone accent */
+  --amber:  #a96e50;   /* dark warm brown */
+
+  --text:       #dce8ec;
+  --text-muted: #627880;
+
+  /* Sizing helpers shared between the silhouette and sidebar */
+  --bjj-h: 72vh;
+  --bjj-w: calc(var(--bjj-h) * 534 / 755 * 0.7);
+
+  --font-sans: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'Space Mono', 'Courier New', monospace;
+
+  --radius-card: 18px;
+  --blur-card:   22px;
+  --gap:         1.1rem;
+}
+
+html { color-scheme: dark; }
+
+body {
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;          /* single page — no scroll on desktop */
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+img { display: block; max-width: 100%; }
+a   { color: inherit; text-decoration: none; }
+
+/* ─── Canvas ──────────────────────────────────────────────────────────────── */
+
+#bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ─── BJJ silhouette watermark ────────────────────────────────────────────── */
+
+#bjj-silhouette {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  height: var(--bjj-h);
+  width: auto;
+  transform: none;
+  opacity: 0.75;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ─── Root layout ─────────────────────────────────────────────────────────── */
+
+.layout {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;            /* allow flex child to shrink */
+  display: flex;
+  gap: var(--gap);
+  padding: 0.9rem 1.2rem 0.9rem 1.2rem;
+}
+
+/* ─── Sidebar ─────────────────────────────────────────────────────────────── */
+
+.sidebar {
+  flex-shrink: 0;
+  width: var(--bjj-w);
+  display: flex;
+  align-items: flex-start;
+  padding-top: 100px;
+  /* Subtle right-edge divider */
+  padding-right: var(--gap);
+  border-right: 1px solid rgba(87, 99, 105, 0.2);
+}
+
+.sidebar-inner {
+  width: 100%;
+}
+
+.name {
+  font-size: clamp(1.35rem, 2vw, 1.85rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  margin-bottom: 1rem;
+
+  background: linear-gradient(135deg,
+    var(--cyan)   0%,
+    var(--purple) 50%,
+    var(--pink)   100%);
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease-in-out infinite alternate;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+.tagline {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.tagline li {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding-left: 0.6rem;
+  border-left: 2px solid rgba(106, 180, 200, 0.28);
+  line-height: 1.5;
+}
+
+/* ─── Cards area ──────────────────────────────────────────────────────────── */
+
+.cards-area {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: 4fr 1fr;   /* cards ~80%, social bar ~20% */
+  gap: var(--gap);
+}
+
+/* ─── Profile cards ───────────────────────────────────────────────────────── */
+
+.profile-card {
+  min-height: 0;             /* let grid squish it */
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.1rem;
+
+  background: var(--surface);
+  backdrop-filter: blur(var(--blur-card)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--blur-card)) saturate(160%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04) inset,
+    0 16px 48px rgba(0,0,0,0.45);
+
+  opacity: 0;
+  animation: cardIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.25s;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+#art-card      { animation-delay: 0.05s; }
+#bjj-card      { animation-delay: 0.15s; }
+#linkedin-card { animation-delay: 0.25s; }
+#social-card   { animation-delay: 0.35s; }
+
+.profile-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 1px rgba(106, 180, 200, 0.10) inset,
+    0 24px 64px rgba(0,0,0,0.5),
+    0 0 32px rgba(106, 180, 200, 0.07);
+}
+
+/* ─── Card header ─────────────────────────────────────────────────────────── */
+
+.card-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.platform-badge {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(74,107,122,0.35), rgba(106,180,200,0.12));
+  border: 1px solid rgba(74,107,122,0.38);
+  color: var(--cyan);
+}
+
+.linkedin-badge {
+  background: linear-gradient(135deg, rgba(0,119,181,0.35), rgba(0,212,255,0.1));
+  border-color: rgba(0,119,181,0.38);
+  color: #60c0ff;
+}
+
+.insta-icon, .linkedin-icon { width: 20px; height: 20px; }
+
+.card-info { flex: 1; min-width: 0; }
+
+.handle {
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.handle a {
+  background: linear-gradient(90deg, var(--cyan), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: filter 0.2s;
+}
+.handle a:hover { filter: brightness(1.25); }
+
+.card-bio {
+  font-size: 0.73rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+  line-height: 1.4;
+  /* Allow bio to wrap to 2 lines max, then cut */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ─── Photo grid ──────────────────────────────────────────────────────────── */
+
+.photo-grid {
+  /* Fill all remaining vertical space in the card */
+  flex: 1;
+  min-height: 0;
+
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 5px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.photo-skeleton {
+  background: linear-gradient(
+    110deg,
+    rgba(255,255,255,0.04) 0%,
+    rgba(255,255,255,0.09) 40%,
+    rgba(255,255,255,0.04) 60%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.9s infinite linear;
+}
+
+@keyframes shimmer {
+  from { background-position:  200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+.photo-item {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: rgba(255,255,255,0.04);
+}
+
+/* Image fills the cell regardless of its natural aspect ratio */
+.photo-item img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), filter 0.25s;
+  filter: saturate(0.85) brightness(0.88);
+}
+.photo-item:hover img {
+  transform: scale(1.08);
+  filter: saturate(1.05) brightness(1);
+}
+
+.video-badge {
+  position: absolute;
+  bottom: 5px; right: 5px;
+  font-size: 0.55rem;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  border-radius: 3px;
+  padding: 2px 4px;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+}
+
+/* No-data state */
+.photo-grid--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.no-data {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  border: 1px dashed rgba(255,255,255,0.09);
+  border-radius: 10px;
+  width: 100%;
+}
+.no-data a {
+  display: inline-block;
+  margin-top: 0.6rem;
+  color: var(--cyan);
+  font-size: 0.75rem;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+.no-data a:hover { opacity: 1; }
+
+/* ─── CTA ─────────────────────────────────────────────────────────────────── */
+
+.card-cta {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cyan);
+  opacity: 0.7;
+  border-bottom: 1px solid rgba(106,180,200,0.28);
+  padding-bottom: 1px;
+  transition: opacity 0.2s, gap 0.2s, border-color 0.2s;
+}
+.card-cta:hover { opacity: 1; gap: 0.6rem; border-bottom-color: var(--cyan); }
+
+.linkedin-cta { color: #60c0ff; border-bottom-color: rgba(96,192,255,0.22); }
+.linkedin-cta:hover { border-bottom-color: #60c0ff; }
+
+/* ─── Social links bar ────────────────────────────────────────────────────── */
+
+#social-card {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  padding: 0.6rem 1.5rem;
+}
+
+.social-links {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 1.2rem;
+  border-radius: 10px;
+  color: var(--text-muted);
+  transition: color 0.2s, background 0.2s;
+}
+
+.social-link:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.social-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--cyan);
+  transition: color 0.2s;
+}
+
+.social-link:hover .social-icon { color: var(--text); }
+
+.social-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+}
+
+.social-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.social-handle {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+
+/* ─── LinkedIn card ───────────────────────────────────────────────────────── */
+
+.linkedin-card {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Giant faded watermark logo */
+.li-watermark {
+  position: absolute;
+  right: -18px;
+  bottom: -22px;
+  width: 160px;
+  height: 160px;
+  color: rgba(106,180,200,0.05);
+  pointer-events: none;
+}
+
+.linkedin-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+}
+
+.linkedin-avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(0,119,181,0.45), rgba(0,212,255,0.2));
+  border: 1.5px solid rgba(96,192,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 0 24px rgba(96,192,255,0.12);
+}
+
+.avatar-initials {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #60c0ff;
+  letter-spacing: 0.04em;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.linkedin-company {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ─── Scrollbar ───────────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: rgba(87,99,105,0.45); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(130,148,156,0.6); }
+
+/* ─── Reduced motion ─────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .name           { animation: none; }
+  .photo-skeleton { animation: none; }
+  .profile-card   { animation: none; opacity: 1; transition: none; }
+  .photo-item img { transition: none; }
+}
+
+/* ─── Tablet (sidebar becomes top bar, 2-col cards) ─────────────────────── */
+
+@media (max-width: 1024px) {
+  body {
+    height: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .layout {
+    flex-direction: column;
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .sidebar {
+    width: 100%;
+    padding-right: 0;
+    padding-top: 0;
+    border-right: none;
+    border-bottom: 1px solid rgba(87,99,105,0.15);
+    padding-bottom: 0.75rem;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 1.5rem;
+  }
+
+  .name {
+    font-size: 1.6rem;
+    margin-bottom: 0;
+    white-space: nowrap;
+  }
+
+  .tagline {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.4rem 1rem;
+  }
+  .tagline li {
+    border-left: none;
+    padding-left: 0;
+    border-bottom: 1px solid rgba(106,180,200,0.22);
+    padding-bottom: 1px;
+  }
+
+  .cards-area {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: auto;
+    gap: 0.75rem;
+  }
+
+  /* LinkedIn spans full width on tablet */
+  #linkedin-card {
+    grid-column: 1 / -1;
+  }
+
+  /* Restore natural photo heights on tablet */
+  .photo-grid {
+    grid-template-rows: auto;
+  }
+  .photo-skeleton {
+    aspect-ratio: 1;
+  }
+  .photo-item {
+    aspect-ratio: 1;
+  }
+  .photo-item img {
+    position: static;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* LinkedIn body doesn't need to fill height here */
+  .linkedin-body {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 0.5rem 0;
+  }
+}
+
+/* ─── Mobile (single column) ─────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .cards-area {
+    grid-template-columns: 1fr;
+  }
+  #linkedin-card {
+    grid-column: auto;
+  }
+  .sidebar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .name { font-size: 1.4rem; }
+}
