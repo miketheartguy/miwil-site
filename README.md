@@ -1,9 +1,11 @@
-# miwil
+# miwil.com
 
 Personal portfolio site for Michael D. Wilson. Single-page, no framework —
 TypeScript + Vite frontend, Cloudflare Pages Functions for server-side logic.
 
 Live at **miwil.com** · Hosted on Cloudflare Pages
+
+:sparkles: Now 100% AI-developed! :sparkles:
 
 ---
 
