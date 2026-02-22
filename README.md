@@ -12,10 +12,10 @@ Live at **miwil.com** · Hosted on Cloudflare Pages
 ```sh
 npm install
 
-# Static-only dev server (no LinkedIn API)
+# Static-only dev server (no Instagram Functions)
 npm run dev
 
-# Full-stack dev with LinkedIn API on http://localhost:8788
+# Full-stack dev with Instagram Functions on http://localhost:8788
 npm run build
 npm run pages:dev
 ```
@@ -43,166 +43,74 @@ socials: [
 
 ## Instagram setup
 
-Instagram photos are served from static JSON files that you populate locally and
-commit. No API calls happen at runtime.
+Instagram feeds are served live via [Behold](https://behold.so) — no tokens,
+no local scripts, no deploys needed when you post new content.
 
-### Step 1 — Switch both accounts to Creator or Business
+### Step 1 — Create a Behold account
 
-Instagram's API **does not work with personal accounts**. For each account:
+Go to [behold.so](https://behold.so) and sign up. Connect your Instagram account
+when prompted (Behold handles the OAuth).
 
-> Settings → Account type and category → Switch to Professional Account → **Creator**
+### Step 2 — Create a feed for each account
 
-Do this for both `@miketheartguy` and `@mikethemartialartsguy`.
+In the Behold dashboard, create two feeds:
 
-### Step 2 — Create a Facebook Developer App
+1. One for `@miketheartguy`
+2. One for `@mikethemartialartsguy`
 
-1. Go to [developers.facebook.com](https://developers.facebook.com) → **My Apps** → **Create App**
-2. Choose type **Business**
-3. Under **Add Products**, add **Instagram Graph API**
-4. Under **App Settings → Basic**, note your **App ID** and **App Secret**
+For each feed, copy the **Feed ID** from the feed settings page.
 
-### Step 3 — Get a long-lived token for each account
+### Step 3 — Add the feed URLs to wrangler.toml
 
-You need one token per Instagram account.
+Edit `wrangler.toml`:
 
-1. Open the [Graph API Explorer](https://developers.facebook.com/tools/explorer)
-2. Select your app, then select the Instagram account
-3. Request permissions: `instagram_basic`, `instagram_content_publish`, `pages_show_list`
-4. Click **Generate Access Token** and approve
-5. Exchange the short-lived token for a long-lived one (valid 60 days):
+```toml
+[vars]
+BEHOLD_FEED_URL_ART = "https://feeds.behold.so/YOUR_ART_FEED_ID"
+BEHOLD_FEED_URL_BJJ = "https://feeds.behold.so/YOUR_BJJ_FEED_ID"
+```
+
+Also add these as **Environment variables** in the Cloudflare Pages dashboard
+(Settings → Environment variables → Production) so the deployed Function can
+read them.
+
+### Step 4 — Deploy
 
 ```sh
-curl "https://graph.instagram.com/access_token\
-?grant_type=ig_exchange_token\
-&client_secret=YOUR_APP_SECRET\
-&access_token=SHORT_LIVED_TOKEN"
+git add wrangler.toml
+git commit -m "Add Behold feed URLs"
+git push
 ```
 
-The response contains `access_token` — that's your long-lived token. Repeat for
-the second account.
+Feeds are served through `/api/instagram/art` and `/api/instagram/bjj` — Cloudflare
+Functions proxy the request to Behold and cache the response for one hour via
+`Cache-Control`. New posts appear on the site within an hour of being published,
+with no deploys needed.
 
-### Step 4 — Add tokens and fetch posts
+### Local development
 
-```sh
-cp .env.example .env
-```
-
-Edit `.env`:
-
-```
-INSTAGRAM_TOKEN_ART=long_lived_token_for_miketheartguy
-INSTAGRAM_TOKEN_BJJ=long_lived_token_for_mikethemartialartsguy
-```
-
-Then pull the latest posts:
-
-```sh
-npm run fetch-instagram
-```
-
-You should see:
-
-```
-✓ Wrote 9 posts → public/data/instagram-art.json
-✓ Wrote 9 posts → public/data/instagram-bjj.json
-```
-
-Commit the updated JSON files and deploy.
-
-### Token maintenance
-
-Long-lived tokens expire after **60 days**. Refresh before they expire:
-
-```sh
-curl "https://graph.instagram.com/refresh_access_token\
-?grant_type=ig_refresh_token\
-&access_token=YOUR_LONG_LIVED_TOKEN"
-```
-
-Update `.env` with the new token, re-run `npm run fetch-instagram`, and redeploy.
-Or use `npm run deploy:fresh` to do the fetch + build + deploy in one step.
+The Instagram Function requires `pages:dev` to run (Vite-only dev won't have it).
+Feed cards will show skeleton placeholders under `npm run dev`.
 
 ---
 
 ## LinkedIn setup
 
-The LinkedIn card shows your profile photo and headline, fetched via OAuth and
-cached in Cloudflare Workers KV. The OAuth flow runs **once** (or whenever you
-want to refresh it) — not on every visitor load.
+The LinkedIn card is configured statically in `src/config.ts` — no API or OAuth
+required.
 
-### Step 1 — Create a LinkedIn Developer App
-
-1. Go to [developer.linkedin.com](https://developer.linkedin.com) → **My Apps** → **Create app**
-2. Under the **Products** tab, add **Sign In with LinkedIn using OpenID Connect**
-3. Under **Auth → OAuth 2.0 settings**, add the redirect URI:
-   ```
-   https://miwil.com/api/linkedin-callback
-   ```
-4. Note your **Client ID** and **Client Secret**
-
-### Step 2 — Create a Workers KV namespace
-
-```sh
-npx wrangler kv namespace create LINKEDIN_KV
-# → note the id
-
-npx wrangler kv namespace create LINKEDIN_KV --preview
-# → note the preview_id
+```ts
+linkedin: {
+  url:      'https://www.linkedin.com/in/YOUR_HANDLE',
+  title:    'Your current job title',
+  company:  'Your employer',           // optional
+  avatarUrl: '/images/avatar.jpg',     // optional — see below
+},
 ```
 
-Paste both IDs into `wrangler.toml`:
-
-```toml
-[[kv_namespaces]]
-binding    = "LINKEDIN_KV"
-id         = "<production id>"
-preview_id = "<preview id>"
-```
-
-### Step 3 — Set secrets in Cloudflare
-
-In the Cloudflare dashboard under **Pages → miwil → Settings → Environment variables**,
-or via CLI:
-
-```sh
-npx wrangler pages secret put LINKEDIN_CLIENT_ID
-npx wrangler pages secret put LINKEDIN_CLIENT_SECRET
-npx wrangler pages secret put LINKEDIN_AUTH_SECRET   # any random string you choose
-```
-
-`LINKEDIN_AUTH_SECRET` is a passphrase that guards the auth URL so only you can
-trigger the OAuth flow.
-
-### Step 4 — Run the OAuth flow
-
-After deploying, visit:
-
-```
-https://miwil.com/api/linkedin-auth?secret=YOUR_AUTH_SECRET
-```
-
-You'll be redirected to LinkedIn to approve, then returned to a confirmation page
-showing your name and photo. The profile is now stored in KV and the card will
-update within one hour (CDN cache). To see it immediately, purge the Cloudflare
-cache from the dashboard.
-
-Re-run this URL any time you want to refresh your photo or headline.
-
-### Local testing
-
-For local Pages Functions dev, copy your secrets to `.dev.vars` (never commit this):
-
-```sh
-cp .env.example .dev.vars
-# edit .dev.vars with real LinkedIn values
-npm run build && npm run pages:dev
-```
-
-Then test at:
-
-```
-http://localhost:8788/api/linkedin-auth?secret=YOUR_AUTH_SECRET
-```
+To show a profile photo, drop a headshot into `public/images/` and set `avatarUrl`
+to the path (e.g. `/images/avatar.jpg`). Update `title` or `company` any time your
+role changes, then `git push` to deploy.
 
 ---
 
@@ -246,62 +154,19 @@ Add the following for the **Production** environment:
 
 | Variable | Value |
 |---|---|
-| `LINKEDIN_CLIENT_ID` | From your LinkedIn Developer App |
-| `LINKEDIN_CLIENT_SECRET` | From your LinkedIn Developer App |
-| `LINKEDIN_AUTH_SECRET` | Any random string you choose |
+| `BEHOLD_FEED_URL_ART` | `https://feeds.behold.so/YOUR_ART_FEED_ID` |
+| `BEHOLD_FEED_URL_BJJ` | `https://feeds.behold.so/YOUR_BJJ_FEED_ID` |
 
-These are the only secrets Cloudflare needs at build/runtime. Instagram tokens
-stay in your local `.env` and are never deployed — only the JSON files they
-produce are committed to the repo.
-
-### Step 4 — Create and bind the Workers KV namespace
-
-The LinkedIn card caches profile data in Workers KV. Create the namespace once:
-
-```sh
-npx wrangler kv namespace create LINKEDIN_KV
-# → copy the returned id
-
-npx wrangler kv namespace create LINKEDIN_KV --preview
-# → copy the returned preview_id
-```
-
-Paste both IDs into `wrangler.toml`:
-
-```toml
-[[kv_namespaces]]
-binding    = "LINKEDIN_KV"
-id         = "<production id>"
-preview_id = "<preview id>"
-```
-
-Commit and push that change. Then bind the namespace in the dashboard:
-
-**Pages → miwil → Settings → Functions → KV namespace bindings → Add binding**
-
-| Variable name | KV namespace |
-|---|---|
-| `LINKEDIN_KV` | `LINKEDIN_KV` (the namespace you just created) |
-
-### Step 5 — Trigger the LinkedIn OAuth flow
-
-Once the site is live, visit this URL in your browser (you'll be redirected to
-LinkedIn to approve, then land on a confirmation page):
-
-```
-https://miwil.com/api/linkedin-auth?secret=YOUR_LINKEDIN_AUTH_SECRET
-```
-
-Your profile photo and headline are now stored in KV and will appear on the site
-within one hour (CDN cache). Re-visit this URL any time you want to refresh them.
+These are also set in `wrangler.toml` for local dev — the dashboard values take
+precedence in production.
 
 ### Ongoing workflow
 
 | Task | How |
 |---|---|
 | Deploy a code change | `git push` — Cloudflare builds and deploys automatically |
-| Refresh Instagram photos | `npm run fetch-instagram` → `git add public/data/ && git commit && git push` |
-| Refresh LinkedIn profile | Visit the `/api/linkedin-auth?secret=…` URL |
+| Refresh Instagram photos | Automatic — Behold fetches live on each page load |
+| Update LinkedIn details | Edit `src/config.ts` → `git push` |
 | Update site content | Edit `src/config.ts` → `git push` |
 
 ---
@@ -311,11 +176,10 @@ within one hour (CDN cache). Re-visit this URL any time you want to refresh them
 If you prefer to deploy from your local machine without Git Integration:
 
 ```sh
-npm run deploy          # build + deploy current state
-npm run deploy:fresh    # fetch Instagram → build → deploy
+npm run deploy   # build + deploy current state
 ```
 
-Requires a local Cloudflare login (`npx wrangler login`) and valid tokens in `.env`.
+Requires a local Cloudflare login (`npx wrangler login`).
 
 ---
 
@@ -326,8 +190,6 @@ Requires a local Cloudflare login (`npx wrangler login`) and valid tokens in `.e
 | `npm run dev` | Vite dev server — static only, no Functions |
 | `npm run build` | Type-check + build to `dist/` |
 | `npm run preview` | Preview built `dist/` locally |
-| `npm run pages:dev` | Full-stack local dev on :8788 (Functions + KV) |
-| `npm run fetch-instagram` | Pull latest posts → `public/data/*.json` |
+| `npm run pages:dev` | Full-stack local dev on :8788 (Functions) |
 | `npm run deploy` | Build + deploy to Cloudflare Pages |
-| `npm run deploy:fresh` | Fetch Instagram → build → deploy |
 | `npm run typecheck:functions` | Type-check `functions/` against worker types |

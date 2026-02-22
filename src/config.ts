@@ -3,16 +3,16 @@ export const config = {
 
   instagram: {
     art: {
-      handle:   'miketheartguy',
-      bio:      'Pen & ink figurative drawings, mostly from a live model',
-      url:      'https://www.instagram.com/miketheartguy',
-      dataFile: '/data/instagram-art.json',
+      handle:  'miketheartguy',
+      bio:     'Pen & ink figurative drawings, mostly from a live model',
+      url:     'https://www.instagram.com/miketheartguy',
+      feedUrl: '/api/instagram/art',
     },
     bjj: {
-      handle:   'mikethemartialartsguy',
-      bio:      'BJJ & Muay Thai — the only workout that actually sticks',
-      url:      'https://www.instagram.com/mikethemartialartsguy',
-      dataFile: '/data/instagram-bjj.json',
+      handle:  'mikethemartialartsguy',
+      bio:     'BJJ & Muay Thai — the only workout that actually sticks',
+      url:     'https://www.instagram.com/mikethemartialartsguy',
+      feedUrl: '/api/instagram/bjj',
     },
   },
 
@@ -44,16 +44,16 @@ export const config = {
     //
     // ── EDIT THESE ──────────────────────────────────────────────────
     // Your LinkedIn profile URL (the part after linkedin.com/in/)
-    url:     'https://www.linkedin.com/in/YOUR_HANDLE',
+    url:     'https://www.linkedin.com/in/miwil/',
     // Your current job title (update when you change roles)
-    title:   'Senior Healthcare Data & Analytics Professional',
+    title:   'VP, Information Technology',
     // Optional: your employer / organisation
-    company: '',
+    company: 'HF Software Solutions, Inc.',
     // Optional: path to a profile photo hosted with the site.
-    //   1. Drop the image into public/images/linkedin-avatar.jpg
-    //   2. Change this value to '/images/linkedin-avatar.jpg'
+    //   1. Drop the image into public/images/linkedin.jpg
+    //   2. Change this value to '/images/linkedin.jpg'
     //   3. The initials avatar will be replaced automatically.
-    avatarUrl: '',
+    avatarUrl: '/images/linkedin.jpg',
     // ────────────────────────────────────────────────────────────────
   },
 } as const;

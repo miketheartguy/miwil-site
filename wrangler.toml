@@ -2,7 +2,8 @@ name = "miwil"
 pages_build_output_dir = "dist"
 compatibility_date = "2024-09-23"
 
-[[kv_namespaces]]
-binding = "LINKEDIN_KV"
-id = ""          # fill in after: wrangler kv namespace create LINKEDIN_KV
-preview_id = ""  # fill in after: wrangler kv namespace create LINKEDIN_KV --preview
+[vars]
+# Behold feed URLs — replace with your real feed IDs from behold.so
+BEHOLD_FEED_URL_ART = "https://feeds.behold.so/Kbd2hGmpjcBOVKmUNauX"
+BEHOLD_FEED_URL_BJJ = "https://feeds.behold.so/siNeY1KShYAWIkgYZ1o5"
+

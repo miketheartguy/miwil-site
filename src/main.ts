@@ -1,5 +1,5 @@
 import { DelaunayBg } from './delaunay-bg';
-import { loadInstagramFeed, renderPhotoGrid, renderNoData } from './instagram';
+import { loadInstagramFeed, renderPhotoGrid } from './instagram';
 import { config } from './config';
 
 // ── Canvas background ────────────────────────────────────────────────────────
@@ -31,38 +31,6 @@ if (li.avatarUrl) {
   avatarEl.appendChild(img);
 }
 
-async function initLinkedIn(): Promise<void> {
-  try {
-    const res = await fetch('/api/linkedin-profile');
-    if (!res.ok) return;
-
-    const data = await res.json() as {
-      name?: string;
-      picture?: string;
-      headline?: string;
-      updated_at?: string;
-    };
-
-    if (data.headline) {
-      (document.getElementById('linkedin-title') as HTMLElement).textContent = data.headline;
-    }
-
-    if (data.picture) {
-      const avatarEl = document.getElementById('linkedin-avatar') as HTMLElement;
-      avatarEl.innerHTML = '';
-      const img = document.createElement('img');
-      img.src       = data.picture;
-      img.alt       = data.name ?? config.name;
-      img.className = 'avatar-img';
-      avatarEl.appendChild(img);
-    }
-  } catch {
-    // silently fall back to config values shown above
-  }
-}
-
-initLinkedIn();
-
 // ── Instagram feeds ───────────────────────────────────────────────────────────
 
 async function initInstagram(
@@ -75,13 +43,12 @@ async function initInstagram(
 
   if (data && data.posts.length > 0) {
     renderPhotoGrid(grid, data.posts, 6);
-  } else {
-    renderNoData(grid, profileUrl);
   }
+  // If no data, keep the skeleton placeholders from the HTML
 }
 
-initInstagram(config.instagram.art.dataFile, 'art-grid', config.instagram.art.url);
-initInstagram(config.instagram.bjj.dataFile, 'bjj-grid', config.instagram.bjj.url);
+initInstagram(config.instagram.art.feedUrl, 'art-grid', config.instagram.art.url);
+initInstagram(config.instagram.bjj.feedUrl, 'bjj-grid', config.instagram.bjj.url);
 
 // ── Social links bar ──────────────────────────────────────────────────────
 

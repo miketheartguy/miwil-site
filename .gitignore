@@ -14,8 +14,12 @@ dist/
 # TypeScript incremental build cache
 *.tsbuildinfo
 
-# Python virtualenv (not part of this project)
+# Python virtualenv
 venv/
+.venv/
+
+# Instaloader session cache (legacy — safe to delete these files)
+.insta-session-*
 
 # Claude Code local settings
 .claude/

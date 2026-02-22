@@ -7,11 +7,9 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "fetch-instagram": "tsx scripts/fetch-instagram.ts",
     "pages:dev": "wrangler pages dev dist",
     "typecheck:functions": "tsc -p functions/tsconfig.json",
-    "deploy": "tsx scripts/deploy.ts",
-    "deploy:fresh": "npm run fetch-instagram && tsx scripts/deploy.ts"
+    "deploy": "tsx scripts/deploy.ts"
   },
   "dependencies": {
     "d3-delaunay": "^6.0.4"
