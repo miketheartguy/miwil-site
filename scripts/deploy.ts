@@ -25,7 +25,7 @@ function run(cmd: string, args: string[]): void {
 run('npm', ['run', 'build']);
 
 // 2. Deploy
-run('npx', ['wrangler', 'pages', 'deploy', 'dist', '--project-name', 'miwil']);
+run('npx', ['wrangler', 'pages', 'deploy', 'dist', '--project-name', 'miwil-site']);
 
 // 3. Reminder
 console.log(`
