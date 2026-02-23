@@ -157,13 +157,16 @@ a   { color: inherit; text-decoration: none; }
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  justify-content: safe center;
   gap: var(--gap);
 }
 
 .profile-grid {
   flex-shrink: 0;
+  width: 100%;
+  container-type: inline-size;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(max(360px, 25%), 1fr));
   gap: var(--gap);
 }
 
@@ -435,6 +438,12 @@ a   { color: inherit; text-decoration: none; }
   padding: 0.6rem 1.5rem;
 }
 
+@container (min-width: 1116px) {
+  #social-card {
+    grid-column: 1 / -1;     /* full-width bar only in 3-column layout */
+  }
+}
+
 .social-links {
   display: flex;
   flex-wrap: wrap;
@@ -621,10 +630,6 @@ a   { color: inherit; text-decoration: none; }
   .profile-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
-  }
-
-  #linkedin-card {
-    grid-column: 1 / -1;
   }
 
   .photo-item img {
