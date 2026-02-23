@@ -85,6 +85,8 @@ a   { color: inherit; text-decoration: none; }
 /* ─── Sidebar ─────────────────────────────────────────────────────────────── */
 
 .sidebar {
+  position: relative;
+  z-index: 1;
   flex-shrink: 0;
   width: var(--bjj-w);
   display: flex;
